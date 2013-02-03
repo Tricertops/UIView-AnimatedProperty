@@ -10,6 +10,6 @@
 
 @interface ANPCornerView : UIView
 
-@property (nonatomic, readwrite, assign) CGFloat *cornerRadius;
+@property (nonatomic, readwrite, assign) CGFloat cornerRadius;
 
 @end

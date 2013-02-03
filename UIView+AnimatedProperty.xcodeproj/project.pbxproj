@@ -101,7 +101,7 @@
 		5B89F1B516BE5A1500E7CB13 = {
 			isa = PBXGroup;
 			children = (
-				5B89F1F416BE602400E7CB13 /* AnimatedProperty */,
+				5B89F1F416BE602400E7CB13 /* Sources */,
 				5B89F1DE16BE5FE800E7CB13 /* Example */,
 				5B89F1C016BE5A1500E7CB13 /* Frameworks */,
 				5B89F1BF16BE5A1500E7CB13 /* Products */,
@@ -155,13 +155,12 @@
 			path = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		5B89F1F416BE602400E7CB13 /* AnimatedProperty */ = {
+		5B89F1F416BE602400E7CB13 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
 				5B89F1F716BE602400E7CB13 /* AnimatedProperty.h */,
 				5B89F1F916BE602400E7CB13 /* AnimatedProperty.m */,
 			);
-			name = AnimatedProperty;
 			path = Sources;
 			sourceTree = "<group>";
 		};
@@ -337,6 +336,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Example/Supporting Files/Prefix.pch";
 				INFOPLIST_FILE = "$(SRCROOT)/Example/Supporting Files/Info.plist";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-all_load",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -348,6 +351,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Example/Supporting Files/Prefix.pch";
 				INFOPLIST_FILE = "$(SRCROOT)/Example/Supporting Files/Info.plist";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-all_load",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
