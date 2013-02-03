@@ -1,17 +1,17 @@
 //
-//  AnimatedProperty.m
+//  UIView+AnimatedProperty.m
 //  AnimatedProperty
 //
 //  Created by Martin Kiss on 3.2.13.
 //  Copyright (c) 2013 iMartin Kiss. All rights reserved.
 //
 
-#import "AnimatedProperty.h"
+#import "UIView+AnimatedProperty.h"
 #import <objc/message.h>
 
 
 
-@implementation UIView (ANPOverrideAnimationMethods)
+@implementation UIView (AnimatedProperty)
 
 
 

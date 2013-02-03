@@ -16,8 +16,8 @@
 		5B89F1EB16BE5FE800E7CB13 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 5B89F1E416BE5FE800E7CB13 /* Default@2x.png */; };
 		5B89F1ED16BE5FE800E7CB13 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B89F1E616BE5FE800E7CB13 /* main.m */; };
 		5B89F1F316BE602400E7CB13 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B89F1C316BE5A1500E7CB13 /* Foundation.framework */; };
-		5B89F1F816BE602400E7CB13 /* AnimatedProperty.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5B89F1F716BE602400E7CB13 /* AnimatedProperty.h */; };
-		5B89F1FA16BE602400E7CB13 /* AnimatedProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B89F1F916BE602400E7CB13 /* AnimatedProperty.m */; };
+		5B89F1F816BE602400E7CB13 /* UIView+AnimatedProperty.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5B89F1F716BE602400E7CB13 /* UIView+AnimatedProperty.h */; };
+		5B89F1FA16BE602400E7CB13 /* UIView+AnimatedProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B89F1F916BE602400E7CB13 /* UIView+AnimatedProperty.m */; };
 		5B89F20016BE608E00E7CB13 /* libAnimatedProperty.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B89F1F216BE602400E7CB13 /* libAnimatedProperty.a */; };
 		5B89F20116BE609600E7CB13 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B89F1C116BE5A1500E7CB13 /* UIKit.framework */; };
 		5B89F20316BE609B00E7CB13 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B89F20216BE609B00E7CB13 /* QuartzCore.framework */; };
@@ -43,7 +43,7 @@
 			dstPath = "include/${PRODUCT_NAME}";
 			dstSubfolderSpec = 16;
 			files = (
-				5B89F1F816BE602400E7CB13 /* AnimatedProperty.h in CopyFiles */,
+				5B89F1F816BE602400E7CB13 /* UIView+AnimatedProperty.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -63,8 +63,8 @@
 		5B89F1E616BE5FE800E7CB13 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		5B89F1E716BE5FE800E7CB13 /* Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Prefix.pch; sourceTree = "<group>"; };
 		5B89F1F216BE602400E7CB13 /* libAnimatedProperty.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libAnimatedProperty.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		5B89F1F716BE602400E7CB13 /* AnimatedProperty.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AnimatedProperty.h; sourceTree = "<group>"; };
-		5B89F1F916BE602400E7CB13 /* AnimatedProperty.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AnimatedProperty.m; sourceTree = "<group>"; };
+		5B89F1F716BE602400E7CB13 /* UIView+AnimatedProperty.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIView+AnimatedProperty.h"; sourceTree = "<group>"; };
+		5B89F1F916BE602400E7CB13 /* UIView+AnimatedProperty.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIView+AnimatedProperty.m"; sourceTree = "<group>"; };
 		5B89F20216BE609B00E7CB13 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		5B89F20516BE60CB00E7CB13 /* ANPViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ANPViewController.h; sourceTree = "<group>"; };
 		5B89F20616BE60CB00E7CB13 /* ANPViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ANPViewController.m; sourceTree = "<group>"; };
@@ -158,8 +158,8 @@
 		5B89F1F416BE602400E7CB13 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				5B89F1F716BE602400E7CB13 /* AnimatedProperty.h */,
-				5B89F1F916BE602400E7CB13 /* AnimatedProperty.m */,
+				5B89F1F716BE602400E7CB13 /* UIView+AnimatedProperty.h */,
+				5B89F1F916BE602400E7CB13 /* UIView+AnimatedProperty.m */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -259,7 +259,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5B89F1FA16BE602400E7CB13 /* AnimatedProperty.m in Sources */,
+				5B89F1FA16BE602400E7CB13 /* UIView+AnimatedProperty.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -399,6 +399,7 @@
 				5B89F1DD16BE5A1500E7CB13 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		5B89F1FB16BE602400E7CB13 /* Build configuration list for PBXNativeTarget "AnimatedProperty" */ = {
 			isa = XCConfigurationList;
@@ -407,6 +408,7 @@
 				5B89F1FD16BE602400E7CB13 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

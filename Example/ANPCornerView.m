@@ -7,7 +7,7 @@
 //
 
 #import "ANPCornerView.h"
-#import "AnimatedProperty.h"
+#import "UIView+AnimatedProperty.h"
 
 
 
