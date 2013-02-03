@@ -1,0 +1,15 @@
+//
+//  main.m
+//  UIView+AnimatedProperty
+//
+//  Created by Martin Kiss on 3.2.13.
+//  Copyright (c) 2013 iMartin Kiss. All rights reserved.
+//
+
+
+
+#ifdef __OBJC__
+    #import <UIKit/UIKit.h>
+    #import <Foundation/Foundation.h>
+    #import <QuartzCore/QuartzCore.h>
+#endif
