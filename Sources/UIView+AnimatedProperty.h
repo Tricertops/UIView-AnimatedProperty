@@ -1,5 +1,5 @@
 //
-//  AnimatedProperty.h
+//  UIView+AnimatedProperty.h
 //  AnimatedProperty
 //
 //  Created by Martin Kiss on 3.2.13.
@@ -14,7 +14,7 @@
 
 
 
-@interface UIView (ANPOverrideAnimationMethods)
+@interface UIView (AnimatedProperty)
 
 + (ANPAnimation *)currentAnimation;
 
