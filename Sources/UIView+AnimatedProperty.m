@@ -51,19 +51,11 @@ static ANPAnimation *_currentAnimation = nil;
     Method origMethod3 = class_getClassMethod(self, origSelector3);
     Method newMethod3 = class_getClassMethod(self, newSelector3);
     method_exchangeImplementations(origMethod3, newMethod3);
-    
-    SEL origSelector4 = @selector(_setupAnimationWithDuration:delay:view:options:animations:start:completion:);
-    SEL newSelector4 = @selector(anp_setupAnimationWithDuration:delay:view:options:animations:start:completion:);
-    Method origMethod4 = class_getClassMethod(self, origSelector4);
-    Method newMethod4 = class_getClassMethod(self, newSelector4);
-    method_exchangeImplementations(origMethod4, newMethod4);
-    
 }
 
 + (void)anp_new_animateWithDuration:(NSTimeInterval)duration
                          animations:(void (^)(void))animations {
     // IMPORTANT: On runtime, this method has selector `+animateWithDuration:animations:` !!!
-    NSLog(@"YATA!!");
     // IMPORTANT: Sending the following message runs original implementation of `+animateWithDuration:animations:` !!!
     [self anp_new_animateWithDuration:duration
                            animations:^{
@@ -77,7 +69,6 @@ static ANPAnimation *_currentAnimation = nil;
                          animations:(void (^)(void))animations
                          completion:(void (^)(BOOL))completion {
     // IMPORTANT: On runtime, this method has selector `+animateWithDuration:animations:completion:` !!!
-    NSLog(@"YATA!!");
     // IMPORTANT: Sending the following message runs original implementation of `+animateWithDuration:animations:completion:` !!!
     [self anp_new_animateWithDuration:duration
                            animations:^{
@@ -94,7 +85,6 @@ static ANPAnimation *_currentAnimation = nil;
                          animations:(void (^)(void))animations
                          completion:(void (^)(BOOL))completion {
     // IMPORTANT: On runtime, this method has selector `+animateWithDuration:delay:options:animations:completion:` !!!
-    NSLog(@"YATA!!");
     // IMPORTANT: Sending the following message runs original implementation of `+animateWithDuration:delay:options:animations:completion:` !!!
     [self anp_new_animateWithDuration:duration
                                 delay:delay
