@@ -59,7 +59,7 @@ static ANPAnimation *_currentAnimation = nil;
     // IMPORTANT: Sending the following message runs original implementation of `+animateWithDuration:animations:` !!!
     [self anp_new_animateWithDuration:duration
                            animations:^{
-                               [UIView setCurrentAnimation:[[ANPAnimation alloc] initWithDuration:duration animationOptions:0]];
+                               [UIView setCurrentAnimation:[[ANPAnimation alloc] initWithDuration:duration delay:0 animationOptions:0]];
                                animations();
                                [UIView setCurrentAnimation:nil];
                            }];
@@ -72,7 +72,7 @@ static ANPAnimation *_currentAnimation = nil;
     // IMPORTANT: Sending the following message runs original implementation of `+animateWithDuration:animations:completion:` !!!
     [self anp_new_animateWithDuration:duration
                            animations:^{
-                               [UIView setCurrentAnimation:[[ANPAnimation alloc] initWithDuration:duration animationOptions:0]];
+                               [UIView setCurrentAnimation:[[ANPAnimation alloc] initWithDuration:duration delay:0 animationOptions:0]];
                                animations();
                                [UIView setCurrentAnimation:nil];
                            }
@@ -90,7 +90,7 @@ static ANPAnimation *_currentAnimation = nil;
                                 delay:delay
                               options:options
                            animations:^{
-                               [UIView setCurrentAnimation:[[ANPAnimation alloc] initWithDuration:duration animationOptions:options]];
+                               [UIView setCurrentAnimation:[[ANPAnimation alloc] initWithDuration:duration delay:delay animationOptions:options]];
                                animations();
                                [UIView setCurrentAnimation:nil];
                            }
@@ -107,16 +107,18 @@ static ANPAnimation *_currentAnimation = nil;
 
 
 @interface ANPAnimation ()
+@property (nonatomic, readwrite, assign) NSTimeInterval delay;
 @property (nonatomic, readwrite, assign) NSTimeInterval duration;
 @property (nonatomic, readwrite, assign) UIViewAnimationOptions options;
 @end
 
 @implementation ANPAnimation
 
-- (id)initWithDuration:(NSTimeInterval)duration animationOptions:(UIViewAnimationOptions)options {
+- (id)initWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay animationOptions:(UIViewAnimationOptions)options {
     self = [super init];
     if (self) {
         self.duration = duration;
+        self.delay = delay;
         self.options = options;
     }
     return self;
@@ -138,5 +140,23 @@ static ANPAnimation *_currentAnimation = nil;
     }
     return [CAMediaTimingFunction functionWithName:timingFunctionName];
 }
+
+- (CABasicAnimation *)basicAnimationForKeypath:(NSString *)keypath toValue:(id)toValue {
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:keypath];
+    animation.duration = self.duration + self.delay; // This is how CAAnimation timing works.
+    animation.beginTime = CACurrentMediaTime() + self.delay;
+    animation.timingFunction = [self timingFunction];
+    animation.toValue = toValue;
+    animation.fillMode = kCAFillModeForwards;
+    animation.removedOnCompletion = NO;
+    return animation;
+}
+
+- (void)addBasicAnimationToLayer:(CALayer *)layer keypath:(NSString *)keypath toValue:(id)toValue {
+    CABasicAnimation *animation = [self basicAnimationForKeypath:keypath toValue:toValue];
+    [layer addAnimation:animation forKey:keypath]; // Key-path used as key.
+}
+
+
 
 @end

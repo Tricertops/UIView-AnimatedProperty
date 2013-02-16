@@ -23,9 +23,20 @@
     cornerView.center = CGPointMake(self.view.bounds.size.width/2, self.view.bounds.size.height/2);
     [self.view addSubview:cornerView];
     
-    [UIView animateWithDuration:5 animations:^{
-        cornerView.cornerRadius = 50;
-    }];
+    NSLog(@"call");
+    [UIView animateWithDuration:5
+                          delay:2
+                        options:UIViewAnimationOptionCurveEaseInOut
+                     animations:^{
+                         NSLog(@"animations");
+                         cornerView.cornerRadius = 50;
+                         cornerView.alpha = 0.99; // This need to be here, because of Issue #1
+                     }
+                     completion:^(BOOL finished){
+                         NSLog(@"completion block");
+                         cornerView.alpha = 1;
+                         cornerView.backgroundColor = [UIColor redColor];
+                     }];
 }
 
 @end

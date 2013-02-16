@@ -25,15 +25,7 @@ Your `UIView` subclass with **custom animated property**:
         self.layer.cornerRadius = cornerRadius;
     }
     else {
-        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"cornerRadius"];
-        
-        // You can access duration and timing function is created for you from options
-        animation.duration = [[UIView currentAnimation] duration];
-        animation.timingFunction = [[UIView currentAnimation] timingFunction];
-        
-        animation.toValue = @(cornerRadius);
-        animation.fillMode = kCAFillModeForwards;
-        animation.removedOnCompletion = NO;
+        CABasicAnimation *animation = [[UIView currentAnimation] basicAnimationForKeypath:@"cornerRadius" toValue:@(cornerRadius)];
         [self.layer addAnimation:animation forKey:@"setCornerRadius:"];
     }
 }
@@ -47,8 +39,10 @@ This is **how you use** it:
 }];
 ```
 
+For more detailed example, see the project.
+
 ---
-_Version 0.1.0_
+_Version 0.2.0_
 
 MIT License, Copyright © 2013 Martin Kiss
 
