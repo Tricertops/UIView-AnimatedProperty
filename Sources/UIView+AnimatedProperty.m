@@ -15,6 +15,10 @@
 
 
 
+
+
+#pragma mark - Current Animation
+
 static ANPAnimation *_currentAnimation = nil;
 
 + (ANPAnimation *)currentAnimation {
@@ -27,6 +31,10 @@ static ANPAnimation *_currentAnimation = nil;
 
 
 
+
+
+#pragma mark - Exchange Methods
+
 + (void)load {
     // This is special method.
     // It is called on each category and can not be overriden.
@@ -34,24 +42,27 @@ static ANPAnimation *_currentAnimation = nil;
     
     // We exchange implementation of those 3 methods.
     
-    SEL origSelector1 = @selector(animateWithDuration:animations:);
-    SEL newSelector1 = @selector(anp_new_animateWithDuration:animations:);
-    Method origMethod1 = class_getClassMethod(self, origSelector1);
-    Method newMethod1 = class_getClassMethod(self, newSelector1);
-    method_exchangeImplementations(origMethod1, newMethod1);
+    [self anp_exchangeImplementationsOf:@selector(        animateWithDuration:animations:)
+                                    and:@selector(anp_new_animateWithDuration:animations:)];
     
-    SEL origSelector2 = @selector(animateWithDuration:animations:completion:);
-    SEL newSelector2 = @selector(anp_new_animateWithDuration:animations:completion:);
-    Method origMethod2 = class_getClassMethod(self, origSelector2);
-    Method newMethod2 = class_getClassMethod(self, newSelector2);
-    method_exchangeImplementations(origMethod2, newMethod2);
+    [self anp_exchangeImplementationsOf:@selector(        animateWithDuration:animations:completion:)
+                                    and:@selector(anp_new_animateWithDuration:animations:completion:)];
     
-    SEL origSelector3 = @selector(animateWithDuration:delay:options:animations:completion:);
-    SEL newSelector3 = @selector(anp_new_animateWithDuration:delay:options:animations:completion:);
-    Method origMethod3 = class_getClassMethod(self, origSelector3);
-    Method newMethod3 = class_getClassMethod(self, newSelector3);
-    method_exchangeImplementations(origMethod3, newMethod3);
+    [self anp_exchangeImplementationsOf:@selector(        animateWithDuration:delay:options:animations:completion:)
+                                    and:@selector(anp_new_animateWithDuration:delay:options:animations:completion:)];
 }
+    
++ (void)anp_exchangeImplementationsOf:(SEL)originalSelector and:(SEL)modifiedSelector {
+    Method originalMethod = class_getClassMethod(self, originalSelector);
+    Method modifiedMethod = class_getClassMethod(self, modifiedSelector);
+    method_exchangeImplementations(originalMethod, modifiedMethod);
+}
+
+
+
+
+
+#pragma mark Animation Methods
 
 + (void)anp_new_animateWithDuration:(NSTimeInterval)duration
                          animations:(void (^)(void))animations {
@@ -105,14 +116,23 @@ static ANPAnimation *_currentAnimation = nil;
 
 
 
+#pragma mark - Animation Object
 
 @interface ANPAnimation ()
+
 @property (nonatomic, readwrite, assign) NSTimeInterval delay;
 @property (nonatomic, readwrite, assign) NSTimeInterval duration;
 @property (nonatomic, readwrite, assign) UIViewAnimationOptions options;
+
 @end
 
+
+
+
+
 @implementation ANPAnimation
+
+
 
 - (id)initWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay animationOptions:(UIViewAnimationOptions)options {
     self = [super init];
@@ -123,6 +143,8 @@ static ANPAnimation *_currentAnimation = nil;
     }
     return self;
 }
+
+
 
 - (CAMediaTimingFunction *)timingFunction {
     NSString *timingFunctionName = kCAMediaTimingFunctionDefault;
@@ -141,6 +163,8 @@ static ANPAnimation *_currentAnimation = nil;
     return [CAMediaTimingFunction functionWithName:timingFunctionName];
 }
 
+
+
 - (CABasicAnimation *)basicAnimationForKeypath:(NSString *)keypath toValue:(id)toValue {
     CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:keypath];
     animation.duration = self.duration + self.delay; // This is how CAAnimation timing works.
@@ -152,6 +176,8 @@ static ANPAnimation *_currentAnimation = nil;
     return animation;
 }
 
+
+
 - (void)addBasicAnimationToLayer:(CALayer *)layer keypath:(NSString *)keypath toValue:(id)toValue {
     CABasicAnimation *animation = [self basicAnimationForKeypath:keypath toValue:toValue];
     [layer addAnimation:animation forKey:keypath]; // Key-path used as key.
@@ -159,4 +185,10 @@ static ANPAnimation *_currentAnimation = nil;
 
 
 
+
+
 @end
+
+
+
+

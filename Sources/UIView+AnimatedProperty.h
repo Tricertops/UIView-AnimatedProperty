@@ -37,12 +37,15 @@
 
 @interface ANPAnimation : NSObject
 
+// Atrributes of the animation.
 @property (nonatomic, readonly, assign) NSTimeInterval delay;
 @property (nonatomic, readonly, assign) NSTimeInterval duration;
 @property (nonatomic, readonly, assign) UIViewAnimationOptions options;
 
+// Creates timing function based on animation options.
 @property (nonatomic, readonly, strong) CAMediaTimingFunction *timingFunction;
 
+// Used internally to create animation representation.
 - (id)initWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay animationOptions:(UIViewAnimationOptions)options;
 
 // Returns pre-set animation with duration, delay, keypath, value and fill mode. You can make additional changes and add the layer yourself.
