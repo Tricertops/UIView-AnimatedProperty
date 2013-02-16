@@ -253,7 +253,7 @@ static NSMutableArray *_currentAnimationStack = nil;
     animation.duration = self.duration;
     animation.beginTime = CACurrentMediaTime() + self.delay;
     animation.timingFunction = self.timingFunction;
-    animation.repeatCount = (self.repeat? 0 : HUGE_VALF);
+    animation.repeatCount = (self.repeat? HUGE_VALF : 0);
     animation.autoreverses = self.autoreverse;
     
     animation.fillMode = kCAFillModeForwards;
