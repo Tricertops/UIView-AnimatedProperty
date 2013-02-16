@@ -28,14 +28,23 @@
 
 #pragma mark - Current Animation
 
-static ANPAnimation *_currentAnimation = nil;
+static NSMutableArray *_currentAnimationStack = nil;
 
 + (ANPAnimation *)currentAnimation {
-    return _currentAnimation;
+    return [_currentAnimationStack lastObject];
 }
 
 + (void)setCurrentAnimation:(ANPAnimation *)animation {
-    _currentAnimation = animation;
+    if ( ! _currentAnimationStack) {
+        _currentAnimationStack = [[NSMutableArray alloc] initWithCapacity:2];
+    }
+    // `nil` animation causes the stack to be popped
+    if (animation) {
+        [_currentAnimationStack addObject:animation];
+    }
+    else {
+        [_currentAnimationStack removeLastObject];
+    }
 }
 
 
@@ -182,10 +191,24 @@ static ANPAnimation *_currentAnimation = nil;
 - (id)initWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay animationOptions:(UIViewAnimationOptions)options {
     self = [super init];
     if (self) {
-        self.duration = duration;
-        self.delay = delay;
         self.options = options;
+        self.delay = delay;
+        
+        if ([UIView currentAnimation]) {
+            // Nested animation
+            BOOL shouldOverrideDuration = (options & UIViewAnimationOptionOverrideInheritedDuration);
+            NSTimeInterval parentDuration = [[UIView currentAnimation] duration];
+            self.duration = (shouldOverrideDuration? duration : parentDuration);
+            
+            BOOL shouldOverrideTimingFunction = (options & UIViewAnimationOptionOverrideInheritedDuration);
+            CAMediaTimingFunction *parentTimingFunction = [[UIView currentAnimation] timingFunction];
+            self.timingFunction = (shouldOverrideTimingFunction? [self timingFunctionFromAnimationOptions:options] : parentTimingFunction);
+        }
+        else {
+            // Not nested animation
+            self.duration = duration;
             self.timingFunction = [self timingFunctionFromAnimationOptions:options];
+        }
     }
     return self;
 }
@@ -197,7 +220,7 @@ static ANPAnimation *_currentAnimation = nil;
     //    UIViewAnimationOptionCurveEaseIn               = 1 << 16,
     //    UIViewAnimationOptionCurveEaseOut              = 2 << 16,
     //    UIViewAnimationOptionCurveLinear               = 3 << 16,
-
+    
     NSString *timingFunctionName = kCAMediaTimingFunctionDefault;
     NSUInteger shiftedOptions = options >> 16;
     switch (shiftedOptions) {
