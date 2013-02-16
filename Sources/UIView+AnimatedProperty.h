@@ -37,11 +37,12 @@
 
 @interface ANPAnimation : NSObject
 
+@property (nonatomic, readonly, assign) NSTimeInterval delay;
 @property (nonatomic, readonly, assign) NSTimeInterval duration;
 @property (nonatomic, readonly, assign) UIViewAnimationOptions options;
 
 @property (nonatomic, readonly, strong) CAMediaTimingFunction *timingFunction;
 
-- (id)initWithDuration:(NSTimeInterval)duration animationOptions:(UIViewAnimationOptions)options;
+- (id)initWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay animationOptions:(UIViewAnimationOptions)options;
 
 @end
