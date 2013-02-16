@@ -33,7 +33,6 @@
                      }
                      completion:^(BOOL finished){
                          NSLog(@"completion block");
-                         cornerView.alpha = 1;
                          cornerView.backgroundColor = [UIColor redColor];
                      }];
 }

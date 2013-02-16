@@ -167,6 +167,7 @@ static ANPAnimation *_currentAnimation = nil;
 @property (nonatomic, readwrite, assign) NSTimeInterval delay;
 @property (nonatomic, readwrite, assign) NSTimeInterval duration;
 @property (nonatomic, readwrite, assign) UIViewAnimationOptions options;
+@property (nonatomic, readwrite, strong) CAMediaTimingFunction *timingFunction;
 
 @end
 
@@ -184,25 +185,27 @@ static ANPAnimation *_currentAnimation = nil;
         self.duration = duration;
         self.delay = delay;
         self.options = options;
+            self.timingFunction = [self timingFunctionFromAnimationOptions:options];
     }
     return self;
 }
 
 
+- (CAMediaTimingFunction *)timingFunctionFromAnimationOptions:(UIViewAnimationOptions)options {
+    //    UIViewAnimationOptions:
+    //    UIViewAnimationOptionCurveEaseInOut            = 0 << 16,
+    //    UIViewAnimationOptionCurveEaseIn               = 1 << 16,
+    //    UIViewAnimationOptionCurveEaseOut              = 2 << 16,
+    //    UIViewAnimationOptionCurveLinear               = 3 << 16,
 
-- (CAMediaTimingFunction *)timingFunction {
     NSString *timingFunctionName = kCAMediaTimingFunctionDefault;
-    if (self.options & UIViewAnimationOptionCurveLinear) {
-        timingFunctionName = kCAMediaTimingFunctionLinear;
-    }
-    else if (self.options & UIViewAnimationOptionCurveEaseIn) {
-        timingFunctionName = kCAMediaTimingFunctionEaseIn;
-    }
-    else if (self.options & UIViewAnimationOptionCurveEaseOut) {
-        timingFunctionName = kCAMediaTimingFunctionEaseOut;
-    }
-    else if (self.options & UIViewAnimationOptionCurveEaseInOut) {
-        timingFunctionName = kCAMediaTimingFunctionEaseInEaseOut;
+    NSUInteger shiftedOptions = options >> 16;
+    switch (shiftedOptions) {
+        case 0: timingFunctionName = kCAMediaTimingFunctionEaseInEaseOut;   break;
+        case 1: timingFunctionName = kCAMediaTimingFunctionEaseIn;          break;
+        case 2: timingFunctionName = kCAMediaTimingFunctionEaseOut;         break;
+        case 3: timingFunctionName = kCAMediaTimingFunctionLinear;          break;
+        default: break;
     }
     return [CAMediaTimingFunction functionWithName:timingFunctionName];
 }
@@ -211,7 +214,7 @@ static ANPAnimation *_currentAnimation = nil;
 
 - (CABasicAnimation *)basicAnimationForKeypath:(NSString *)keypath toValue:(id)toValue {
     CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:keypath];
-    animation.duration = self.duration + self.delay; // This is how CAAnimation timing works.
+    animation.duration = self.duration;
     animation.beginTime = CACurrentMediaTime() + self.delay;
     animation.timingFunction = [self timingFunction];
     animation.toValue = toValue;
@@ -225,6 +228,12 @@ static ANPAnimation *_currentAnimation = nil;
 - (void)addBasicAnimationToLayer:(CALayer *)layer keypath:(NSString *)keypath toValue:(id)toValue {
     CABasicAnimation *animation = [self basicAnimationForKeypath:keypath toValue:toValue];
     [layer addAnimation:animation forKey:keypath]; // Key-path used as key.
+}
+
+
+
+- (NSString *)description {
+    return [NSString stringWithFormat:@"<%@; %p: delay=%.2f; duration=%.2f; options=%i>", [self class], self, self->_delay, self->_duration, self->_options];
 }
 
 
