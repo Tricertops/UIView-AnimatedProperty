@@ -45,4 +45,10 @@
 
 - (id)initWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay animationOptions:(UIViewAnimationOptions)options;
 
+// Returns pre-set animation with duration, delay, keypath, value and fill mode. You can make additional changes and add the layer yourself.
+- (CABasicAnimation *)basicAnimationForKeypath:(NSString *)keypath toValue:(id)toValue;
+
+// Adds animation returned from above method to given layer
+- (void)addBasicAnimationToLayer:(CALayer *)layer keypath:(NSString *)keypath toValue:(id)toValue;
+
 @end

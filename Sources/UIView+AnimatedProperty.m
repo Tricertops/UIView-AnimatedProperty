@@ -141,4 +141,22 @@ static ANPAnimation *_currentAnimation = nil;
     return [CAMediaTimingFunction functionWithName:timingFunctionName];
 }
 
+- (CABasicAnimation *)basicAnimationForKeypath:(NSString *)keypath toValue:(id)toValue {
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:keypath];
+    animation.duration = self.duration + self.delay; // This is how CAAnimation timing works.
+    animation.beginTime = CACurrentMediaTime() + self.delay;
+    animation.timingFunction = [self timingFunction];
+    animation.toValue = toValue;
+    animation.fillMode = kCAFillModeForwards;
+    animation.removedOnCompletion = NO;
+    return animation;
+}
+
+- (void)addBasicAnimationToLayer:(CALayer *)layer keypath:(NSString *)keypath toValue:(id)toValue {
+    CABasicAnimation *animation = [self basicAnimationForKeypath:keypath toValue:toValue];
+    [layer addAnimation:animation forKey:keypath]; // Key-path used as key.
+}
+
+
+
 @end

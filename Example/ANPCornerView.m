@@ -24,12 +24,7 @@
         self.layer.cornerRadius = cornerRadius;
     }
     else {
-        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"cornerRadius"];
-        animation.duration = [[UIView currentAnimation] duration];
-        animation.timingFunction = [[UIView currentAnimation] timingFunction];
-        animation.toValue = @(cornerRadius);
-        animation.fillMode = kCAFillModeForwards;
-        animation.removedOnCompletion = NO;
+        CABasicAnimation *animation = [[UIView currentAnimation] basicAnimationForKeypath:@"cornerRadius" toValue:@(cornerRadius)];
         [self.layer addAnimation:animation forKey:@"setCornerRadius:"];
     }
 }
