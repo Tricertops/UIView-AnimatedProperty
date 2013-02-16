@@ -24,17 +24,15 @@
     [self.view addSubview:cornerView];
     
     NSLog(@"call");
-    [UIView animateWithDuration:5
+    [UIView animateWithDuration:1
                           delay:2
-                        options:UIViewAnimationOptionCurveEaseInOut
+                        options:UIViewAnimationOptionAutoreverse | UIViewAnimationOptionCurveEaseOut
                      animations:^{
                          NSLog(@"animations");
                          cornerView.cornerRadius = 50;
-                         cornerView.alpha = 0.99; // This need to be here, because of Issue #1
                      }
                      completion:^(BOOL finished){
                          NSLog(@"completion block");
-                         cornerView.alpha = 1;
                          cornerView.backgroundColor = [UIColor redColor];
                      }];
 }

@@ -11,21 +11,47 @@
 
 
 
+// Issue #1: If the animation block does not contain any built-in UIView animations (e.g. frame, alpha, center, …),
+//           the animations are considered completed immediately and the completion bock is invoked.
+// Fix   #1: Create fake view and animate its property to ensure the completion block is invoked after the delay.
+#define FIX_ISSUE_1     1
+
+
+
+
+
 @implementation UIView (AnimatedProperty)
 
 
 
-static ANPAnimation *_currentAnimation = nil;
+
+
+#pragma mark - Current Animation
+
+static NSMutableArray *_currentAnimationStack = nil;
 
 + (ANPAnimation *)currentAnimation {
-    return _currentAnimation;
+    return [_currentAnimationStack lastObject];
 }
 
 + (void)setCurrentAnimation:(ANPAnimation *)animation {
-    _currentAnimation = animation;
+    if ( ! _currentAnimationStack) {
+        _currentAnimationStack = [[NSMutableArray alloc] initWithCapacity:2];
+    }
+    // `nil` animation causes the stack to be popped
+    if (animation) {
+        [_currentAnimationStack addObject:animation];
+    }
+    else {
+        [_currentAnimationStack removeLastObject];
+    }
 }
 
 
+
+
+
+#pragma mark - Exchange Methods
 
 + (void)load {
     // This is special method.
@@ -34,49 +60,49 @@ static ANPAnimation *_currentAnimation = nil;
     
     // We exchange implementation of those 3 methods.
     
-    SEL origSelector1 = @selector(animateWithDuration:animations:);
-    SEL newSelector1 = @selector(anp_new_animateWithDuration:animations:);
-    Method origMethod1 = class_getClassMethod(self, origSelector1);
-    Method newMethod1 = class_getClassMethod(self, newSelector1);
-    method_exchangeImplementations(origMethod1, newMethod1);
+    [self anp_exchangeImplementationsOf:@selector(        animateWithDuration:animations:)
+                                    and:@selector(anp_new_animateWithDuration:animations:)];
     
-    SEL origSelector2 = @selector(animateWithDuration:animations:completion:);
-    SEL newSelector2 = @selector(anp_new_animateWithDuration:animations:completion:);
-    Method origMethod2 = class_getClassMethod(self, origSelector2);
-    Method newMethod2 = class_getClassMethod(self, newSelector2);
-    method_exchangeImplementations(origMethod2, newMethod2);
+    [self anp_exchangeImplementationsOf:@selector(        animateWithDuration:animations:completion:)
+                                    and:@selector(anp_new_animateWithDuration:animations:completion:)];
     
-    SEL origSelector3 = @selector(animateWithDuration:delay:options:animations:completion:);
-    SEL newSelector3 = @selector(anp_new_animateWithDuration:delay:options:animations:completion:);
-    Method origMethod3 = class_getClassMethod(self, origSelector3);
-    Method newMethod3 = class_getClassMethod(self, newSelector3);
-    method_exchangeImplementations(origMethod3, newMethod3);
+    [self anp_exchangeImplementationsOf:@selector(        animateWithDuration:delay:options:animations:completion:)
+                                    and:@selector(anp_new_animateWithDuration:delay:options:animations:completion:)];
 }
+
++ (void)anp_exchangeImplementationsOf:(SEL)originalSelector and:(SEL)modifiedSelector {
+    Method originalMethod = class_getClassMethod(self, originalSelector);
+    Method modifiedMethod = class_getClassMethod(self, modifiedSelector);
+    method_exchangeImplementations(originalMethod, modifiedMethod);
+}
+
+
+
+
+
+#pragma mark Animation Methods
 
 + (void)anp_new_animateWithDuration:(NSTimeInterval)duration
                          animations:(void (^)(void))animations {
     // IMPORTANT: On runtime, this method has selector `+animateWithDuration:animations:` !!!
     // IMPORTANT: Sending the following message runs original implementation of `+animateWithDuration:animations:` !!!
-    [self anp_new_animateWithDuration:duration
-                           animations:^{
-                               [UIView setCurrentAnimation:[[ANPAnimation alloc] initWithDuration:duration delay:0 animationOptions:0]];
-                               animations();
-                               [UIView setCurrentAnimation:nil];
-                           }];
+    [self animateWithDuration:duration
+                        delay:0
+                      options:kNilOptions
+                   animations:animations
+                   completion:nil];
 }
 
 + (void)anp_new_animateWithDuration:(NSTimeInterval)duration
                          animations:(void (^)(void))animations
                          completion:(void (^)(BOOL))completion {
     // IMPORTANT: On runtime, this method has selector `+animateWithDuration:animations:completion:` !!!
-    // IMPORTANT: Sending the following message runs original implementation of `+animateWithDuration:animations:completion:` !!!
-    [self anp_new_animateWithDuration:duration
-                           animations:^{
-                               [UIView setCurrentAnimation:[[ANPAnimation alloc] initWithDuration:duration delay:0 animationOptions:0]];
-                               animations();
-                               [UIView setCurrentAnimation:nil];
-                           }
-                           completion:completion];
+    // IMPORTANT: Sending the following message runs modified implementation of `+animateWithDuration:animations:completion:` !!!
+    [self animateWithDuration:duration
+                        delay:0
+                      options:kNilOptions
+                   animations:animations
+                   completion:completion];
 }
 
 + (void)anp_new_animateWithDuration:(NSTimeInterval)duration
@@ -85,72 +111,159 @@ static ANPAnimation *_currentAnimation = nil;
                          animations:(void (^)(void))animations
                          completion:(void (^)(BOOL))completion {
     // IMPORTANT: On runtime, this method has selector `+animateWithDuration:delay:options:animations:completion:` !!!
+#if FIX_ISSUE_1
+    UIView *view = [self anp_createHelperView];
+#endif
     // IMPORTANT: Sending the following message runs original implementation of `+animateWithDuration:delay:options:animations:completion:` !!!
     [self anp_new_animateWithDuration:duration
                                 delay:delay
                               options:options
                            animations:^{
+#if FIX_ISSUE_1
+                               [self anp_applyAnimationOnHelperView:view];
+#endif
                                [UIView setCurrentAnimation:[[ANPAnimation alloc] initWithDuration:duration delay:delay animationOptions:options]];
                                animations();
                                [UIView setCurrentAnimation:nil];
                            }
-                           completion:completion];
+                           completion:^(BOOL finished) {
+#if FIX_ISSUE_1
+                               [self anp_removeHelperView:view];
+#endif
+                               if (completion) completion(finished);
+                           }];
 }
 
 
 
+
+
+#pragma mark - Helper View (Issue #1)
+
+#if FIX_ISSUE_1
++ (UIView *)anp_createHelperView {
+    // Create invisible view and insert it to root VC.
+    UIView *view = [[UIView alloc] init];
+    UIApplication *app = [UIApplication sharedApplication];
+    UIWindow *window = [app.delegate window];
+    [window.rootViewController.view addSubview:view];
+    return view;
+}
+
++ (void)anp_applyAnimationOnHelperView:(UIView *)view {
+    view.alpha = 0.99; // Any built-in animated property
+}
+
++ (void)anp_removeHelperView:(UIView *)view {
+    [view removeFromSuperview];
+}
+#endif
+
+
+
+
+
 @end
 
 
 
 
 
+#pragma mark - Animation Object
 
 @interface ANPAnimation ()
+
 @property (nonatomic, readwrite, assign) NSTimeInterval delay;
 @property (nonatomic, readwrite, assign) NSTimeInterval duration;
 @property (nonatomic, readwrite, assign) UIViewAnimationOptions options;
+@property (nonatomic, readwrite, strong) CAMediaTimingFunction *timingFunction;
+
 @end
 
+
+
+
+
 @implementation ANPAnimation
+
+
 
 - (id)initWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay animationOptions:(UIViewAnimationOptions)options {
     self = [super init];
     if (self) {
-        self.duration = duration;
-        self.delay = delay;
         self.options = options;
+        self.delay = delay;
+        
+        if ([UIView currentAnimation]) {
+            // Nested animation
+            BOOL shouldOverrideDuration = (options & UIViewAnimationOptionOverrideInheritedDuration);
+            NSTimeInterval parentDuration = [[UIView currentAnimation] duration];
+            self.duration = (shouldOverrideDuration? duration : parentDuration);
+            
+            BOOL shouldOverrideTimingFunction = (options & UIViewAnimationOptionOverrideInheritedDuration);
+            CAMediaTimingFunction *parentTimingFunction = [[UIView currentAnimation] timingFunction];
+            self.timingFunction = (shouldOverrideTimingFunction? [self timingFunctionFromAnimationOptions:options] : parentTimingFunction);
+        }
+        else {
+            // Not nested animation
+            self.duration = duration;
+            self.timingFunction = [self timingFunctionFromAnimationOptions:options];
+        }
     }
     return self;
 }
 
-- (CAMediaTimingFunction *)timingFunction {
+
+
+- (CAMediaTimingFunction *)timingFunctionFromAnimationOptions:(UIViewAnimationOptions)options {
+    //    UIViewAnimationOptions:
+    //    UIViewAnimationOptionCurveEaseInOut            = 0 << 16,
+    //    UIViewAnimationOptionCurveEaseIn               = 1 << 16,
+    //    UIViewAnimationOptionCurveEaseOut              = 2 << 16,
+    //    UIViewAnimationOptionCurveLinear               = 3 << 16,
+    
     NSString *timingFunctionName = kCAMediaTimingFunctionDefault;
-    if (self.options & UIViewAnimationOptionCurveLinear) {
-        timingFunctionName = kCAMediaTimingFunctionLinear;
-    }
-    else if (self.options & UIViewAnimationOptionCurveEaseIn) {
-        timingFunctionName = kCAMediaTimingFunctionEaseIn;
-    }
-    else if (self.options & UIViewAnimationOptionCurveEaseOut) {
-        timingFunctionName = kCAMediaTimingFunctionEaseOut;
-    }
-    else if (self.options & UIViewAnimationOptionCurveEaseInOut) {
-        timingFunctionName = kCAMediaTimingFunctionEaseInEaseOut;
+    NSUInteger shiftedOptions = options >> 16;
+    switch (shiftedOptions) {
+        case 0: timingFunctionName = kCAMediaTimingFunctionEaseInEaseOut;   break;
+        case 1: timingFunctionName = kCAMediaTimingFunctionEaseIn;          break;
+        case 2: timingFunctionName = kCAMediaTimingFunctionEaseOut;         break;
+        case 3: timingFunctionName = kCAMediaTimingFunctionLinear;          break;
+        default: break;
     }
     return [CAMediaTimingFunction functionWithName:timingFunctionName];
 }
 
+
+
+- (BOOL)layoutSubviews              {     return (self.options & UIViewAnimationOptionLayoutSubviews            );     }
+- (BOOL)allowUserInteraction        {     return (self.options & UIViewAnimationOptionAllowUserInteraction      );     }
+- (BOOL)beginFromCurrentState       {     return (self.options & UIViewAnimationOptionBeginFromCurrentState     );     }
+- (BOOL)repeat                      {     return (self.options & UIViewAnimationOptionRepeat                    );     }
+- (BOOL)autoreverse                 {     return (self.options & UIViewAnimationOptionAutoreverse               );     }
+- (BOOL)overrideInheritedDuration   {     return (self.options & UIViewAnimationOptionOverrideInheritedDuration );     }
+- (BOOL)overrideInheritedCurve      {     return (self.options & UIViewAnimationOptionOverrideInheritedCurve    );     }
+- (BOOL)allowAnimatedContent        {     return (self.options & UIViewAnimationOptionAllowAnimatedContent      );     }
+
+
+
 - (CABasicAnimation *)basicAnimationForKeypath:(NSString *)keypath toValue:(id)toValue {
     CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:keypath];
-    animation.duration = self.duration + self.delay; // This is how CAAnimation timing works.
+    
+    animation.duration = self.duration;
     animation.beginTime = CACurrentMediaTime() + self.delay;
-    animation.timingFunction = [self timingFunction];
-    animation.toValue = toValue;
+    animation.timingFunction = self.timingFunction;
+    animation.repeatCount = (self.repeat? HUGE_VALF : 0);
+    animation.autoreverses = self.autoreverse;
+    
     animation.fillMode = kCAFillModeForwards;
     animation.removedOnCompletion = NO;
+    
+    animation.toValue = toValue;
     return animation;
 }
+
+
 
 - (void)addBasicAnimationToLayer:(CALayer *)layer keypath:(NSString *)keypath toValue:(id)toValue {
     CABasicAnimation *animation = [self basicAnimationForKeypath:keypath toValue:toValue];
@@ -159,4 +272,16 @@ static ANPAnimation *_currentAnimation = nil;
 
 
 
+- (NSString *)description {
+    return [NSString stringWithFormat:@"<%@; %p: delay=%.2f; duration=%.2f; options=%i>", [self class], self, self->_delay, self->_duration, self->_options];
+}
+
+
+
+
+
 @end
+
+
+
+
