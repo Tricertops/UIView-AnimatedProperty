@@ -137,7 +137,7 @@ static ANPAnimation *_currentAnimation = nil;
     UIView *view = [[UIView alloc] init];
     UIApplication *app = [UIApplication sharedApplication];
     UIWindow *window = [app.delegate window];
-    [window.rootViewController.view insertSubview:view belowSubview:0];
+    [window.rootViewController.view addSubview:view];
     return view;
 }
 
