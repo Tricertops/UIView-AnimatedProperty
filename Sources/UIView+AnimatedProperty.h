@@ -42,8 +42,16 @@
 @property (nonatomic, readonly, assign) NSTimeInterval duration;
 @property (nonatomic, readonly, assign) UIViewAnimationOptions options;
 
-// Creates timing function based on animation options.
+// Convenience accessors for animation options
 @property (nonatomic, readonly, strong) CAMediaTimingFunction *timingFunction;
+@property (nonatomic, readonly, assign) BOOL layoutSubviews;
+@property (nonatomic, readonly, assign) BOOL allowUserInteraction;
+@property (nonatomic, readonly, assign) BOOL beginFromCurrentState;
+@property (nonatomic, readonly, assign) BOOL repeat;
+@property (nonatomic, readonly, assign) BOOL autoreverse;
+@property (nonatomic, readonly, assign) BOOL overrideInheritedDuration;
+@property (nonatomic, readonly, assign) BOOL overrideInheritedCurve;
+@property (nonatomic, readonly, assign) BOOL allowAnimatedContent;
 
 // Used internally to create animation representation.
 - (id)initWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay animationOptions:(UIViewAnimationOptions)options;

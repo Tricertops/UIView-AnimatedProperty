@@ -214,6 +214,7 @@ static NSMutableArray *_currentAnimationStack = nil;
 }
 
 
+
 - (CAMediaTimingFunction *)timingFunctionFromAnimationOptions:(UIViewAnimationOptions)options {
     //    UIViewAnimationOptions:
     //    UIViewAnimationOptionCurveEaseInOut            = 0 << 16,
@@ -235,14 +236,30 @@ static NSMutableArray *_currentAnimationStack = nil;
 
 
 
+- (BOOL)layoutSubviews              {     return (self.options & UIViewAnimationOptionLayoutSubviews            );     }
+- (BOOL)allowUserInteraction        {     return (self.options & UIViewAnimationOptionAllowUserInteraction      );     }
+- (BOOL)beginFromCurrentState       {     return (self.options & UIViewAnimationOptionBeginFromCurrentState     );     }
+- (BOOL)repeat                      {     return (self.options & UIViewAnimationOptionRepeat                    );     }
+- (BOOL)autoreverse                 {     return (self.options & UIViewAnimationOptionAutoreverse               );     }
+- (BOOL)overrideInheritedDuration   {     return (self.options & UIViewAnimationOptionOverrideInheritedDuration );     }
+- (BOOL)overrideInheritedCurve      {     return (self.options & UIViewAnimationOptionOverrideInheritedCurve    );     }
+- (BOOL)allowAnimatedContent        {     return (self.options & UIViewAnimationOptionAllowAnimatedContent      );     }
+
+
+
 - (CABasicAnimation *)basicAnimationForKeypath:(NSString *)keypath toValue:(id)toValue {
     CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:keypath];
+    
     animation.duration = self.duration;
     animation.beginTime = CACurrentMediaTime() + self.delay;
-    animation.timingFunction = [self timingFunction];
-    animation.toValue = toValue;
+    animation.timingFunction = self.timingFunction;
+    animation.repeatCount = (self.repeat? 0 : HUGE_VALF);
+    animation.autoreverses = self.autoreverse;
+    
     animation.fillMode = kCAFillModeForwards;
     animation.removedOnCompletion = NO;
+    
+    animation.toValue = toValue;
     return animation;
 }
 
