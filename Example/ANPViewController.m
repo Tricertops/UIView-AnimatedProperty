@@ -30,7 +30,6 @@
                      animations:^{
                          NSLog(@"animations");
                          cornerView.cornerRadius = 50;
-                         cornerView.alpha = 0.99; // This need to be here, because of Issue #1
                      }
                      completion:^(BOOL finished){
                          NSLog(@"completion block");

@@ -11,6 +11,15 @@
 
 
 
+// Issue #1: If the animation block does not contain any built-in UIView animations (e.g. frame, alpha, center, …),
+//           the animations are considered completed immediately and the completion bock is invoked.
+// Fix   #1: Create fake view and animate its property to ensure the completion block is invoked after the delay.
+#define FIX_ISSUE_1     1
+
+
+
+
+
 @implementation UIView (AnimatedProperty)
 
 
@@ -51,7 +60,7 @@ static ANPAnimation *_currentAnimation = nil;
     [self anp_exchangeImplementationsOf:@selector(        animateWithDuration:delay:options:animations:completion:)
                                     and:@selector(anp_new_animateWithDuration:delay:options:animations:completion:)];
 }
-    
+
 + (void)anp_exchangeImplementationsOf:(SEL)originalSelector and:(SEL)modifiedSelector {
     Method originalMethod = class_getClassMethod(self, originalSelector);
     Method modifiedMethod = class_getClassMethod(self, modifiedSelector);
@@ -68,26 +77,23 @@ static ANPAnimation *_currentAnimation = nil;
                          animations:(void (^)(void))animations {
     // IMPORTANT: On runtime, this method has selector `+animateWithDuration:animations:` !!!
     // IMPORTANT: Sending the following message runs original implementation of `+animateWithDuration:animations:` !!!
-    [self anp_new_animateWithDuration:duration
-                           animations:^{
-                               [UIView setCurrentAnimation:[[ANPAnimation alloc] initWithDuration:duration delay:0 animationOptions:0]];
-                               animations();
-                               [UIView setCurrentAnimation:nil];
-                           }];
+    [self animateWithDuration:duration
+                        delay:0
+                      options:kNilOptions
+                   animations:animations
+                   completion:nil];
 }
 
 + (void)anp_new_animateWithDuration:(NSTimeInterval)duration
                          animations:(void (^)(void))animations
                          completion:(void (^)(BOOL))completion {
     // IMPORTANT: On runtime, this method has selector `+animateWithDuration:animations:completion:` !!!
-    // IMPORTANT: Sending the following message runs original implementation of `+animateWithDuration:animations:completion:` !!!
-    [self anp_new_animateWithDuration:duration
-                           animations:^{
-                               [UIView setCurrentAnimation:[[ANPAnimation alloc] initWithDuration:duration delay:0 animationOptions:0]];
-                               animations();
-                               [UIView setCurrentAnimation:nil];
-                           }
-                           completion:completion];
+    // IMPORTANT: Sending the following message runs modified implementation of `+animateWithDuration:animations:completion:` !!!
+    [self animateWithDuration:duration
+                        delay:0
+                      options:kNilOptions
+                   animations:animations
+                   completion:completion];
 }
 
 + (void)anp_new_animateWithDuration:(NSTimeInterval)duration
@@ -96,17 +102,55 @@ static ANPAnimation *_currentAnimation = nil;
                          animations:(void (^)(void))animations
                          completion:(void (^)(BOOL))completion {
     // IMPORTANT: On runtime, this method has selector `+animateWithDuration:delay:options:animations:completion:` !!!
+#if FIX_ISSUE_1
+    UIView *view = [self anp_createHelperView];
+#endif
     // IMPORTANT: Sending the following message runs original implementation of `+animateWithDuration:delay:options:animations:completion:` !!!
     [self anp_new_animateWithDuration:duration
                                 delay:delay
                               options:options
                            animations:^{
+#if FIX_ISSUE_1
+                               [self anp_applyAnimationOnHelperView:view];
+#endif
                                [UIView setCurrentAnimation:[[ANPAnimation alloc] initWithDuration:duration delay:delay animationOptions:options]];
                                animations();
                                [UIView setCurrentAnimation:nil];
                            }
-                           completion:completion];
+                           completion:^(BOOL finished) {
+#if FIX_ISSUE_1
+                               [self anp_removeHelperView:view];
+#endif
+                               if (completion) completion(finished);
+                           }];
 }
+
+
+
+
+
+#pragma mark - Helper View (Issue #1)
+
+#if FIX_ISSUE_1
++ (UIView *)anp_createHelperView {
+    // Create invisible view and insert it to root VC.
+    UIView *view = [[UIView alloc] init];
+    UIApplication *app = [UIApplication sharedApplication];
+    UIWindow *window = [app.delegate window];
+    [window.rootViewController.view insertSubview:view belowSubview:0];
+    return view;
+}
+
++ (void)anp_applyAnimationOnHelperView:(UIView *)view {
+    view.alpha = 0.99; // Any built-in animated property
+}
+
++ (void)anp_removeHelperView:(UIView *)view {
+    [view removeFromSuperview];
+}
+#endif
+
+
 
 
 
