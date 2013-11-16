@@ -196,13 +196,16 @@ static NSMutableArray *_currentAnimationStack = nil;
         
         if ([UIView currentAnimation]) {
             // Nested animation
-            BOOL shouldOverrideDuration = (options & UIViewAnimationOptionOverrideInheritedDuration);
-            NSTimeInterval parentDuration = [[UIView currentAnimation] duration];
-            self.duration = (shouldOverrideDuration? duration : parentDuration);
             
-            BOOL shouldOverrideTimingFunction = (options & UIViewAnimationOptionOverrideInheritedDuration);
+            NSTimeInterval parentDuration = [[UIView currentAnimation] duration];
+            self.duration = (self.overrideInheritedDuration
+                             ? duration
+                             : parentDuration);
+            
             CAMediaTimingFunction *parentTimingFunction = [[UIView currentAnimation] timingFunction];
-            self.timingFunction = (shouldOverrideTimingFunction? [self timingFunctionFromAnimationOptions:options] : parentTimingFunction);
+            self.timingFunction = (self.overrideInheritedCurve
+                                   ? [self timingFunctionFromAnimationOptions:options]
+                                   : parentTimingFunction);
         }
         else {
             // Not nested animation
