@@ -256,6 +256,10 @@ static NSMutableArray *_currentAnimationStack = nil;
     animation.repeatCount = (self.repeat? HUGE_VALF : 0);
     animation.autoreverses = self.autoreverse;
     
+    if (self.beginFromCurrentState && layer.presentationLayer) {
+        id instantValue = [layer.presentationLayer valueForKeyPath:keyPath];
+        [layer setValue:instantValue forKeyPath:keyPath];
+    }
     animation.fromValue = [layer valueForKeyPath:keyPath];
     animation.toValue = toValue;
     animation.fillMode = kCAFillModeBoth; // Ensure, that old value is “visible” even when delayed.
