@@ -22,13 +22,11 @@ Your `UIView` subclass with **custom animated property**:
 }
 
 - (void)setCornerRadius:(CGFloat)cornerRadius {
-    // Check for existence
-    if ( ! [UIView currentAnimation]) {
-        self.layer.cornerRadius = cornerRadius;
+    if ([UIView currentAnimation]) {
+        [[UIView currentAnimation] animateLayer:self.layer keyPath:@"cornerRadius" toValue:@(cornerRadius)];
     }
     else {
-        CABasicAnimation *animation = [[UIView currentAnimation] basicAnimationForKeypath:@"cornerRadius" toValue:@(cornerRadius)];
-        [self.layer addAnimation:animation forKey:@"setCornerRadius:"];
+        self.layer.cornerRadius = cornerRadius;
     }
 }
 ```
@@ -44,7 +42,7 @@ This is **how you use** it:
 For more detailed example, see the project.
 
 ---
-_Version 0.3.0_
+_Version 0.4.0_
 
 [MIT License](LICENSE.md), Copyright © 2013 Martin Kiss
 
