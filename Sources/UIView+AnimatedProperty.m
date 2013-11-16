@@ -196,13 +196,16 @@ static NSMutableArray *_currentAnimationStack = nil;
         
         if ([UIView currentAnimation]) {
             // Nested animation
-            BOOL shouldOverrideDuration = (options & UIViewAnimationOptionOverrideInheritedDuration);
-            NSTimeInterval parentDuration = [[UIView currentAnimation] duration];
-            self.duration = (shouldOverrideDuration? duration : parentDuration);
             
-            BOOL shouldOverrideTimingFunction = (options & UIViewAnimationOptionOverrideInheritedDuration);
+            NSTimeInterval parentDuration = [[UIView currentAnimation] duration];
+            self.duration = (self.overrideInheritedDuration
+                             ? duration
+                             : parentDuration);
+            
             CAMediaTimingFunction *parentTimingFunction = [[UIView currentAnimation] timingFunction];
-            self.timingFunction = (shouldOverrideTimingFunction? [self timingFunctionFromAnimationOptions:options] : parentTimingFunction);
+            self.timingFunction = (self.overrideInheritedCurve
+                                   ? [self timingFunctionFromAnimationOptions:options]
+                                   : parentTimingFunction);
         }
         else {
             // Not nested animation
@@ -244,6 +247,31 @@ static NSMutableArray *_currentAnimationStack = nil;
 - (BOOL)overrideInheritedDuration   {     return (self.options & UIViewAnimationOptionOverrideInheritedDuration );     }
 - (BOOL)overrideInheritedCurve      {     return (self.options & UIViewAnimationOptionOverrideInheritedCurve    );     }
 - (BOOL)allowAnimatedContent        {     return (self.options & UIViewAnimationOptionAllowAnimatedContent      );     }
+
+
+
+- (void)animateLayer:(CALayer *)layer keyPath:(NSString *)keyPath toValue:(id)toValue {
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:keyPath];
+    
+    animation.duration = self.duration;
+    animation.beginTime = CACurrentMediaTime() + self.delay;
+    animation.timingFunction = self.timingFunction;
+    animation.repeatCount = (self.repeat? HUGE_VALF : 0);
+    animation.autoreverses = self.autoreverse;
+    
+    if (self.beginFromCurrentState && layer.presentationLayer) {
+        id instantValue = [layer.presentationLayer valueForKeyPath:keyPath];
+        [layer setValue:instantValue forKeyPath:keyPath];
+    }
+    animation.fromValue = [layer valueForKeyPath:keyPath];
+    animation.toValue = toValue;
+    animation.fillMode = kCAFillModeBoth; // Ensure, that old value is “visible” even when delayed.
+    
+    if ( ! self.autoreverse) {
+        [layer setValue:toValue forKeyPath:keyPath];
+    }
+    [layer addAnimation:animation forKey:keyPath];
+}
 
 
 
