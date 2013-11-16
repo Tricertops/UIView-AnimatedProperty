@@ -247,6 +247,27 @@ static NSMutableArray *_currentAnimationStack = nil;
 
 
 
+- (void)animateLayer:(CALayer *)layer keyPath:(NSString *)keyPath toValue:(id)toValue {
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:keyPath];
+    
+    animation.duration = self.duration;
+    animation.beginTime = CACurrentMediaTime() + self.delay;
+    animation.timingFunction = self.timingFunction;
+    animation.repeatCount = (self.repeat? HUGE_VALF : 0);
+    animation.autoreverses = self.autoreverse;
+    
+    animation.fromValue = [layer valueForKeyPath:keyPath];
+    animation.toValue = toValue;
+    animation.fillMode = kCAFillModeBoth; // Ensure, that old value is “visible” even when delayed.
+    
+    if ( ! self.autoreverse) {
+        [layer setValue:toValue forKeyPath:keyPath];
+    }
+    [layer addAnimation:animation forKey:keyPath];
+}
+
+
+
 - (CABasicAnimation *)basicAnimationForKeypath:(NSString *)keypath toValue:(id)toValue {
     CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:keypath];
     

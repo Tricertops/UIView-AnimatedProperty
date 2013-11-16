@@ -26,7 +26,8 @@
     NSLog(@"call");
     [UIView animateWithDuration:1
                           delay:2
-                        options:UIViewAnimationOptionAutoreverse | UIViewAnimationOptionCurveEaseOut
+                        options:(  UIViewAnimationOptionAutoreverse
+                                 | UIViewAnimationOptionCurveEaseOut)
                      animations:^{
                          NSLog(@"animations");
                          cornerView.cornerRadius = 50;

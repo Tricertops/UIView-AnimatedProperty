@@ -53,13 +53,16 @@
 @property (nonatomic, readonly, assign) BOOL overrideInheritedCurve;
 @property (nonatomic, readonly, assign) BOOL allowAnimatedContent;
 
-// Used internally to create animation representation.
+/// Used internally to create animation representation.
 - (id)initWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay animationOptions:(UIViewAnimationOptions)options;
 
-// Returns pre-set animation with duration, delay, keypath, value and fill mode. You can make additional changes and add the layer yourself.
-- (CABasicAnimation *)basicAnimationForKeypath:(NSString *)keypath toValue:(id)toValue;
+/// Creates and runs key-path animation on layer aplying all current animation values.
+- (void)animateLayer:(CALayer *)layer keyPath:(NSString *)keyPath toValue:(id)toValue;
 
-// Adds animation returned from above method to given layer
-- (void)addBasicAnimationToLayer:(CALayer *)layer keypath:(NSString *)keypath toValue:(id)toValue;
+/// Deprecated: Uses wrong animation fillMode and removedOnCompletion values. Use -animateLayer:keyPath:toValue: or build and add animation yourself.
+- (CABasicAnimation *)basicAnimationForKeypath:(NSString *)keypath toValue:(id)toValue __deprecated;
+
+/// Deprecated: Useless after deprecating -basicAnimationForKeypath:toValue: method. Use -animateLayer:keyPath:toValue: or build and add animation yourself.
+- (void)addBasicAnimationToLayer:(CALayer *)layer keypath:(NSString *)keypath toValue:(id)toValue __deprecated;
 
 @end
