@@ -1,4 +1,4 @@
-# UIView+AnimatedProperty
+# UIView+AnimatedProperty <a href="https://flattr.com/submit/auto?user_id=Tricertops&url=https%3A%2F%2Fgithub.com%2FiMartinKiss%2FUIView-AnimatedProperty" target="_blank"><img src="https://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0"></a>
 
 This **extension** to `UIView` block animations allows you to implement **your own animated properties** of `UIView` subclasses.
 
